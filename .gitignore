@@ -57,3 +57,4 @@ nunit-*.xml
 **/.idea
 **/.vscode
 **/.DS_Store
+/.vs/KataPotter
