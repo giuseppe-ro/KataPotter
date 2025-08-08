@@ -1,4 +1,75 @@
+using System.Diagnostics;
+using System.Security.Cryptography;
+using static System.Reflection.Metadata.BlobBuilder;
+
 namespace KataPotter;
+
+public class Book
+{
+    public const int Price = 8;
+}
+
+
+public class Basket
+{
+    private readonly int _NumberOfTitles = 5;
+    private readonly Dictionary<int, decimal> _discounts = new Dictionary<int, decimal>
+    {
+        { 2, .05m },
+        { 3, .10m },
+        { 4, .20m},
+        { 5, .25m}
+    };
+
+    internal int[] StackTheBooks(int[] books)
+    {
+        var bookStacks = new int[_NumberOfTitles];
+
+        foreach (var book in books)
+        {
+            bookStacks[book]++;
+        }
+
+        return bookStacks;
+    }
+
+    public decimal GetPrice(int[] books)
+    {
+        var bookStacks = StackTheBooks(books);
+
+        decimal totalDiscount = 0 ;
+
+        while (bookStacks.Any(x => x > 0))
+        {
+            var setSize = bookStacks.Count(x => x > 0);
+            var minStackHeight = bookStacks.Where(x => x != 0).Min();
+
+            totalDiscount += GetBookSetDiscount(setSize) * minStackHeight; ;
+
+            for (var i = 0; i < bookStacks.Length; i++)
+            {
+                if (bookStacks[i] > 0)
+                {
+                    bookStacks[i] -= minStackHeight;
+                }
+            }
+        }
+
+
+        var totalPrice = books.Length * Book.Price;
+ 
+        return totalPrice - totalDiscount;
+    }
+
+    private decimal GetBookSetDiscount(int setSize)
+    {
+       if (_discounts.ContainsKey(setSize))
+          return setSize * Book.Price * _discounts[setSize];
+
+        return 0;
+    }
+
+}
 
 public class Class1Tests
 {
@@ -12,9 +83,10 @@ public class Class1Tests
     public void Test_NormalPrice(decimal expected, int[] books)
     {
         // Arrange
-        
+        var discounter = new Basket();
+
         // Act
-        var result = 0;
+        var result = discounter.GetPrice(books);
 
         // Assert
         Assert.Equal(expected, result);
@@ -29,9 +101,10 @@ public class Class1Tests
     public void Test_SimpleDiscount(decimal expected, int[] books)
     {
         // Arrange
-        
+        var discounter = new Basket();
+
         // Act
-        var result = 0;
+        var result = discounter.GetPrice(books);
 
         // Assert
         Assert.Equal(expected, result);
@@ -45,9 +118,10 @@ public class Class1Tests
     public void Test_SeveralDiscounts(decimal expected, int[] books)
     {
         // Arrange
-        
+        var discounter = new Basket();
+
         // Act
-        var result = 0;
+        var result = discounter.GetPrice(books);
 
         // Assert
         Assert.Equal(expected, result);
@@ -66,9 +140,11 @@ public class Class1Tests
     public void Test_EdgeCasesDiscountsCombinations(decimal expected, int[] books)
     {
         // Arrange
-        
+        var discounter = new Basket();
+
         // Act
-        var result = 0;
+        var result = discounter.GetPrice(books);
+
 
         // Assert
         Assert.Equal(expected, result);
